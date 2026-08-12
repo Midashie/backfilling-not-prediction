@@ -1,0 +1,52 @@
+{
+  "ablation_1_model_selection": [
+    {
+      "policy": "model_selection_ON (RF_SRPT_proxy)",
+      "n_jobs_completed": 656,
+      "avg_jct_min": 134.70064024390243,
+      "p95_jct_min": 602.5,
+      "makespan_min": 10115.0,
+      "mean_gpu_utilization": 0.2591462483522821,
+      "fragmentation_rate": 0.01989683124539425,
+      "backfill_admissions": 10
+    },
+    {
+      "policy": "model_selection_OFF (GBM-only SRPT)",
+      "n_jobs_completed": 656,
+      "avg_jct_min": 134.51314024390243,
+      "p95_jct_min": 602.5,
+      "makespan_min": 10115.0,
+      "mean_gpu_utilization": 0.2591462483522821,
+      "fragmentation_rate": 0.005649717514124294,
+      "backfill_admissions": 6
+    }
+  ],
+  "ablation_2_fragmentation_placement": [
+    {
+      "policy": "RF_SRPT_proxy",
+      "n_jobs_completed": 656,
+      "avg_jct_min": 134.70064024390243,
+      "p95_jct_min": 602.5,
+      "makespan_min": 10115.0,
+      "mean_gpu_utilization": 0.2591462483522821,
+      "fragmentation_rate": 0.0198968312453942,
+      "backfill_admissions": 10,
+      "config": "constrained_120host",
+      "n_hosts": 120,
+      "total_capacity": 960
+    },
+    {
+      "policy": "PredSched_LLM",
+      "n_jobs_completed": 656,
+      "avg_jct_min": 136.60763719512195,
+      "p95_jct_min": 602.5,
+      "makespan_min": 10115.0,
+      "mean_gpu_utilization": 0.259146248352282,
+      "fragmentation_rate": 0.0117907148120854,
+      "backfill_admissions": 7,
+      "config": "constrained_120host",
+      "n_hosts": 120,
+      "total_capacity": 960
+    }
+  ]
+}

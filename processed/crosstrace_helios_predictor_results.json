@@ -1,0 +1,54 @@
+{
+  "Earth": {
+    "n_train": 14809,
+    "n_val": 3174,
+    "n_test": 3174,
+    "gbm_test_mae": 507.57196014390706,
+    "gbm_test_mape": 14442.449444517311,
+    "history_test_mae": 107.12020846460827,
+    "history_test_mape": 628.1262513825003,
+    "selected_test_mae": 123.068588349538,
+    "selected_test_mape": 532.808900016917,
+    "n_vc_groups": 15,
+    "n_vc_using_gbm": 11
+  },
+  "Saturn": {
+    "n_train": 10961,
+    "n_val": 2349,
+    "n_test": 2349,
+    "gbm_test_mae": 97.80428411516945,
+    "gbm_test_mape": 617.9501722145875,
+    "history_test_mae": 70.78663615723003,
+    "history_test_mape": 493.84681996611073,
+    "selected_test_mae": 77.25663044395922,
+    "selected_test_mape": 447.77523540675094,
+    "n_vc_groups": 21,
+    "n_vc_using_gbm": 9
+  },
+  "Uranus": {
+    "n_train": 8470,
+    "n_val": 1815,
+    "n_test": 1815,
+    "gbm_test_mae": 183.3352889971715,
+    "gbm_test_mape": 717.2455196860346,
+    "history_test_mae": 166.24080348943986,
+    "history_test_mape": 1216.4625274160933,
+    "selected_test_mae": 168.81916875112958,
+    "selected_test_mape": 688.7038742871391,
+    "n_vc_groups": 18,
+    "n_vc_using_gbm": 9
+  },
+  "Venus": {
+    "n_train": 3777,
+    "n_val": 809,
+    "n_test": 810,
+    "gbm_test_mae": 180.06128546114454,
+    "gbm_test_mape": 1353.6272849658849,
+    "history_test_mae": 142.62,
+    "history_test_mape": 1822.8019010915311,
+    "selected_test_mae": 155.57399598498034,
+    "selected_test_mape": 1391.729966110853,
+    "n_vc_groups": 19,
+    "n_vc_using_gbm": 5
+  }
+}

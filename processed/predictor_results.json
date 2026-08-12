@@ -1,0 +1,15 @@
+{
+  "run_duration_min": {
+    "gbm_test_mae": 143.8537671290521,
+    "gbm_test_mape": 910.3606562841697,
+    "history_test_mae": 130.703506097561,
+    "history_test_mape": 374.2460263945716,
+    "selected_test_mae": 130.66230870541915,
+    "selected_test_mape": 369.5893046431758,
+    "per_kind_selection": {
+      "ElasticBatchJob": "GBM",
+      "PyTorchJob": "History",
+      "TFJob": "GBM"
+    }
+  }
+}
