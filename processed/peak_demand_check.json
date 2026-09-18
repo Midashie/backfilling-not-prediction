@@ -1,0 +1,11 @@
+{
+  "test_window_start": "2023-07-28 05:37:00",
+  "test_window_end": "2023-07-30 22:50:00",
+  "n_test_set_jobs": 656,
+  "n_jobs_overlapping_window_full_population": 704,
+  "full_cluster_peak_gpu": 1631.0,
+  "full_cluster_peak_gpu_timestamp": "2023-07-28 05:50:00",
+  "test_set_replay_peak_gpu": 812.0,
+  "test_set_replay_peak_gpu_timestamp": "2023-07-29 14:20:00",
+  "nominal_cluster_capacity_gpu": 4920
+}

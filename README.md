@@ -1,8 +1,8 @@
-# Prediction-Informed Scheduling for LLM-Era GPU Clusters — code release
+# Backfilling, Not Prediction (code release)
 
-Code accompanying the paper *"Prediction-Informed Scheduling for LLM-Era GPU
-Clusters: Revisiting Forecast-Driven Job Scheduling on a Modern Production
-Trace"* (Don Harl C. Malabanan, Aboitiz School of Innovation, Technology, And
+Code accompanying the paper *"Backfilling, Not Prediction: A Cluster-Size
+Sweep and Cross-Trace Bootstrap of Forecast-Driven GPU Scheduling in the LLM
+Era"* (Don Harl C. Malabanan, Aboitiz School of Innovation, Technology, And
 Entrepreneurship, Asian Institute of Management).
 
 This repository contains the full pipeline used to produce every number and
@@ -13,18 +13,42 @@ second public dataset, and the figure-generation script. Nothing in the
 paper's Results section is illustrative; every reported number comes from
 running this code against the datasets below.
 
-## Findings of the Paper
+## What this study found
 
 Stated here as directly as it is stated in the paper: the proposed
 prediction-informed and fragmentation-aware scheduling method
-(`PredSched_LLM`) does not show a statistically robust job-completion-time
-advantage over simpler baselines on either trace tested. The real, robust,
-bootstrap-confirmed and cross-trace-confirmed effect is backfilling
-(removing head-of-line blocking) versus strict FIFO, not prediction-informed
-ordering and not fragmentation-aware placement. See Section 6 and Section 8
-of the paper for the full, non-simplified account, including where the two
-traces disagree (prediction shows a real directional signal on the Helios
-trace that it does not show on the Alibaba trace).
+(`PredSched_LLM`) does not show a statistically distinguishable
+job-completion-time advantage over simpler baselines on either trace tested.
+The real, large, bootstrap-confirmed and cross-trace-confirmed effect is
+backfilling (removing head-of-line blocking) versus strict FIFO, not
+prediction-informed ordering and not fragmentation-aware placement. See
+Section 6 and Section 8 of the paper for the full, non-simplified account,
+including where the two traces disagree (prediction shows a real directional
+signal on the Helios trace that it does not show on the Alibaba trace). An
+oracle-duration upper-bound check (`scripts/10_oracle_bootstrap.py`) rules
+out a natural objection, that the trained predictor is simply too weak to
+test this fairly: even a scheduler ordered on each job's true, already-known
+duration does not clear backfilling's bar either, so the shortfall is not
+primarily a predictor-quality artifact. A second check
+(`scripts/11_easy_backfill.py`) rules out a different objection, that the
+backfilling effect itself is specific to `Backfill_FIFO`'s aggressive
+implementation: EASY-style conservative backfilling also beats strict FIFO
+substantially, confirming backfilling as a concept is not an implementation
+artifact, though it captures much less of the benefit than the aggressive
+variant under this trace's poor duration predictions, since conservative
+backfilling (unlike aggressive) depends on those estimates being reliable.
+A resource-footprint sensitivity check (`scripts/12_footprint_sensitivity.py`)
+finds both headline comparisons essentially unchanged when the 5 jobs whose
+kind implies runtime-resizable allocation are removed. A tenant-level block
+bootstrap (`scripts/13_tenant_block_bootstrap.py`), resampling the test
+set's 17 tenants instead of individual jobs to test whether the original
+bootstrap's job-independence assumption matters, finds the backfilling
+effect weakens (70.0% and 90.3% of replicates favor it, at 120 and 64 hosts
+respectively, down from 97.0% and 99.7% under job-level resampling) but
+does not disappear, while the prediction-versus-backfilling null result
+stays just as null. The qualitative conclusion survives; the certainty
+attached to the backfilling effect specifically is more modest than the
+job-level bootstrap's headline numbers alone would suggest.
 
 ## Pipeline
 
@@ -39,7 +63,12 @@ Run in order from the repository root:
 | `scripts/05_sweep.py` | 19-point cluster-size sweep, 64 to 615 hosts | `processed/sweep_results.csv/json`, `sweep_crossover_check.csv` |
 | `scripts/06_bootstrap.py` | 300-replicate job-level bootstrap at 120 and 64 hosts | `processed/bootstrap_raw.csv`, `bootstrap_summary.csv`, `bootstrap_comparisons.csv` |
 | `scripts/07_crosstrace_helios.py` | Cross-trace validation on all 4 Helios clusters | `processed/crosstrace_helios_*.csv/json` |
-| `scripts/08_make_figures.py` | Builds the two figures referenced in Section 6.2 | `figures/fig1_sweep_curve.png`, `figures/fig2_bootstrap_ci.png` |
+| `scripts/08_make_figures.py` | Builds the figures referenced in Section 6.2 and Section 6.4 | `figures/fig1_sweep_curve.png`, `figures/fig2_bootstrap_ci.png`, `figures/fig3_crosstrace_helios.png` |
+| `scripts/09_peak_demand_check.py` | Computes the two peak-concurrent-GPU-demand figures cited in Section 5.1 (real, whole-cluster peak) and Section 5.3 (peak demand of the 656 replayed test-set jobs alone) | `processed/peak_demand_check.json` |
+| `scripts/10_oracle_bootstrap.py` | Oracle-duration upper-bound check (Section 6.2): reruns the same 300-replicate bootstrap at 120 and 64 hosts with an `Oracle_SRPT` policy ordered on true, already-known job duration instead of a prediction, to separate predictor quality from the value of prediction-informed ordering itself. Reuses the exact resample sequence from `06_bootstrap.py` so results are directly paired against `Backfill_FIFO` and `RF_SRPT_proxy` there. | `processed/oracle_bootstrap_raw.csv`, `oracle_bootstrap_summary.csv`, `oracle_bootstrap_comparisons.csv` |
+| `scripts/11_easy_backfill.py` | Additional established-scheduler check (Section 6.2): adds `EASY_Backfill`, the reservation-based conservative backfilling algorithm (Lifka 1995; Mu'alem & Feitelson 2001), to test whether the backfilling effect is specific to `Backfill_FIFO`'s aggressive implementation. Includes a built-in sanity check (a perfect-information diagnostic run) confirming the algorithm itself is correct independent of predictor quality. Reuses the same resample sequence as `06_bootstrap.py`. | `processed/easy_backfill_bootstrap_raw.csv`, `easy_backfill_bootstrap_summary.csv`, `easy_backfill_bootstrap_comparisons.csv` |
+| `scripts/12_footprint_sensitivity.py` | Resource-footprint sensitivity check (Section 7 Limitations): reruns the same 300-replicate, six-policy bootstrap at 120 and 64 hosts with the 5 ElasticBatchJob jobs (the only kind whose name implies runtime-resizable allocation) removed from the 656-job test set, to test whether the two headline comparisons are sensitive to treating realized worker allocation as a proxy for requested allocation. | `processed/footprint_sensitivity_bootstrap_raw.csv`, `footprint_sensitivity_comparisons.csv` |
+| `scripts/13_tenant_block_bootstrap.py` | Tenant-level block bootstrap (Section 7 Limitations): tests whether 06_bootstrap.py's job-level independence assumption matters by resampling the test set's 17 tenants with replacement instead of individual jobs, preserving within-tenant correlation. Only the three policies needed for the two headline comparisons (FIFO, Backfill_FIFO, RF_SRPT_proxy) are run, to keep runtime reasonable. | `processed/tenant_block_bootstrap_raw.csv`, `tenant_block_bootstrap_comparisons.csv` |
 
 `processed/` in this repository already contains the exact output files used
 to write the paper, so you can inspect results without rerunning anything.
@@ -70,6 +99,11 @@ python scripts/05_sweep.py
 python scripts/06_bootstrap.py
 python scripts/07_crosstrace_helios.py
 python scripts/08_make_figures.py
+python scripts/09_peak_demand_check.py
+python scripts/10_oracle_bootstrap.py
+python scripts/11_easy_backfill.py
+python scripts/12_footprint_sensitivity.py
+python scripts/13_tenant_block_bootstrap.py
 ```
 
 ## Known limitations (see paper Section 7 for the full list)

@@ -81,21 +81,24 @@ def main():
 
     # Paired comparisons per replicate: does PredSched_LLM beat RF_SRPT_proxy, and
     # does RF_SRPT_proxy (prediction) beat Backfill_FIFO (backfill only, no prediction)?
+    # (column names below were briefly "Pollux" during an earlier version of this
+    # script, before Backfill_FIFO was renamed away from that name -- see 03_simulate.py;
+    # fixed here so the shipped CSV cannot contradict the paper's own Section 5.2 text.)
     comparisons = []
     for n_hosts in HOST_CONFIGS:
         sub = df[df["n_hosts"] == n_hosts]
         piv = sub.pivot(index="boot_rep", columns="policy", values="avg_jct_min")
         pred_vs_rf = piv["PredSched_LLM"] - piv["RF_SRPT_proxy"]
-        rf_vs_pollux = piv["RF_SRPT_proxy"] - piv["Backfill_FIFO"]
-        pollux_vs_fifo = piv["Backfill_FIFO"] - piv["FIFO"]
+        rf_vs_backfill = piv["RF_SRPT_proxy"] - piv["Backfill_FIFO"]
+        backfill_vs_fifo = piv["Backfill_FIFO"] - piv["FIFO"]
         comparisons.append({
             "n_hosts": n_hosts,
             "PredSched_minus_RF_SRPT_mean": pred_vs_rf.mean(), "PredSched_minus_RF_SRPT_ci": (pred_vs_rf.quantile(0.025), pred_vs_rf.quantile(0.975)),
             "pct_reps_PredSched_beats_RF_SRPT": float((pred_vs_rf < 0).mean() * 100),
-            "RF_SRPT_minus_Pollux_mean": rf_vs_pollux.mean(), "RF_SRPT_minus_Pollux_ci": (rf_vs_pollux.quantile(0.025), rf_vs_pollux.quantile(0.975)),
-            "pct_reps_RF_SRPT_beats_Pollux": float((rf_vs_pollux < 0).mean() * 100),
-            "Pollux_minus_FIFO_mean": pollux_vs_fifo.mean(), "Pollux_minus_FIFO_ci": (pollux_vs_fifo.quantile(0.025), pollux_vs_fifo.quantile(0.975)),
-            "pct_reps_Pollux_beats_FIFO": float((pollux_vs_fifo < 0).mean() * 100),
+            "RF_SRPT_minus_Backfill_mean": rf_vs_backfill.mean(), "RF_SRPT_minus_Backfill_ci": (rf_vs_backfill.quantile(0.025), rf_vs_backfill.quantile(0.975)),
+            "pct_reps_RF_SRPT_beats_Backfill": float((rf_vs_backfill < 0).mean() * 100),
+            "Backfill_minus_FIFO_mean": backfill_vs_fifo.mean(), "Backfill_minus_FIFO_ci": (backfill_vs_fifo.quantile(0.025), backfill_vs_fifo.quantile(0.975)),
+            "pct_reps_Backfill_beats_FIFO": float((backfill_vs_fifo < 0).mean() * 100),
         })
     comp_df = pd.DataFrame(comparisons)
     print("\n=== Paired bootstrap comparisons (negative = left side has lower/better JCT) ===")
