@@ -14,7 +14,7 @@ second public dataset, and the figure-generation script. Nothing in the
 paper's Results section is illustrative; every reported number comes from
 running this code against the datasets below.
 
-## What this study actually found
+## What this study found
 
 Stated here as directly as it is stated in the paper: the proposed
 prediction-informed and fragmentation-aware scheduling method
