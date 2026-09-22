@@ -62,11 +62,18 @@ equivalence.
 
 Scope note: given four clusters must be run, the sweep here uses 7 host
 counts per cluster (vs. 19 for the primary Alibaba analysis) and the
-bootstrap uses 40 replicates at 2 load levels per cluster (vs. 60 for
-the primary analysis's 2 configs, now being separately raised to ~300
-in the main pipeline). This is a real reduction in statistical
-resolution relative to the primary analysis and is reported as such,
-not hidden.
+bootstrap uses 40 replicates at 3 operating points per cluster (floor,
+a genuine intermediate matched-contention point, and native full
+capacity; vs. 60 replicates at 2 configs for the primary analysis, now
+being separately raised to ~300 in the main pipeline). This is a real
+reduction in statistical resolution relative to the primary analysis
+and is reported as such, not hidden. The intermediate point (added for
+Reviewer 4, Round 3, Comment 7) is the smallest host count, stepped up
+multiplicatively from the same correct bootstrap-population floor used
+below, at which the Backfill_FIFO-vs-FIFO gap has decayed to close to,
+but no less than, 10 percent of the floor point's own gap -- see the
+INTERMEDIATE_POINT_BY_CLUSTER comment further down for the exact
+per-cluster values and how they were chosen.
 """
 
 import json
@@ -360,7 +367,36 @@ def main():
         # no contention at all, not because contention doesn't exist but
         # because the wrong cluster size was tested. Same principle as
         # 05_sweep.py's floor assertion, applied to this population.
-        boot_points = sorted(set([host_counts[0], max_workers_boot]))
+        # Comment 7 fix (Reviewer 4, Round 3): add one genuine intermediate,
+        # matched-contention operating point, anchored to the CORRECT floor
+        # for this bootstrap population (max_workers_boot), not the mismatched
+        # full-population sweep floor. A preliminary deterministic exploration
+        # (explore_intermediate.py, explore_intermediate2.py) found that the
+        # arithmetic midpoint between floor and full capacity is already at
+        # zero contention for 3 of 4 clusters, and that the Backfill-vs-FIFO
+        # gap actually decays multiplicatively, at a different rate per
+        # cluster. The chosen point below is the smallest grid point (floor *
+        # 1.25/1.5/2/3/4/6/8/12/16/24, capped at full capacity) at which the
+        # gap has fallen to close to, but no less than, 10% of the floor
+        # point's own gap -- a real, still-measurable "matched, less extreme"
+        # contention level, chosen the same way for every cluster rather than
+        # picked per cluster to fit a narrative:
+        #   Earth  12 hosts (1.5x floor 8):  gap  10.1% of floor's
+        #   Saturn 12 hosts (3.0x floor 4):  gap  10.3% of floor's
+        #   Uranus 18 hosts (3.0x floor 6):  gap  10.1% of floor's
+        #   Venus  16 hosts (4.0x floor 4):  gap   8.4% of floor's
+        # This is appended AFTER the original two boot_points below, drawn
+        # from the same rng stream in the same order as the originally
+        # published run, so the floor and full-capacity points reproduce
+        # bit-for-bit and only the new intermediate point consumes fresh
+        # random draws.
+        INTERMEDIATE_POINT_BY_CLUSTER = {"Earth": 12, "Saturn": 12, "Uranus": 18, "Venus": 16}
+        boot_points_original = sorted(set([host_counts[0], max_workers_boot]))
+        intermediate_point = INTERMEDIATE_POINT_BY_CLUSTER[cluster]
+        boot_points = boot_points_original + (
+            [intermediate_point] if intermediate_point not in boot_points_original else []
+        )
+        print(f"  {cluster} boot_points (original order, then new intermediate): {boot_points}")
         rng = np.random.default_rng(20260811)
         for n_hosts in boot_points:
             print(f"  {cluster} bootstrapping at {n_hosts} hosts, {N_BOOT} reps")

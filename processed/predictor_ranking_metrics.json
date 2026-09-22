@@ -1,0 +1,30 @@
+{
+  "n_test_jobs": 656,
+  "selected_panel": {
+    "spearman_rho": 0.45595228458019893,
+    "spearman_p": 5.432382592450297e-35,
+    "kendall_tau": 0.33847349399237964,
+    "kendall_p": 4.340801288986047e-34,
+    "pairwise_ordering_accuracy_pct": 64.81193467850858,
+    "concordant_pairs": 126684,
+    "non_tied_pairs": 195464
+  },
+  "history_only": {
+    "spearman_rho": 0.4389799122698682,
+    "spearman_p": 2.8096203951559335e-32,
+    "kendall_tau": 0.32558701281357094,
+    "kendall_p": 2.0977034632369254e-31,
+    "pairwise_ordering_accuracy_pct": 63.61069045962427,
+    "concordant_pairs": 124336,
+    "non_tied_pairs": 195464
+  },
+  "gbm_only": {
+    "spearman_rho": 0.4482146143951107,
+    "spearman_p": 9.797708311503042e-34,
+    "kendall_tau": 0.3218851359717976,
+    "kendall_p": 2.9542819738021246e-32,
+    "pairwise_ordering_accuracy_pct": 66.59231367412926,
+    "concordant_pairs": 130164,
+    "non_tied_pairs": 195464
+  }
+}

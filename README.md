@@ -13,7 +13,7 @@ second public dataset, and the figure-generation script. Nothing in the
 paper's Results section is illustrative; every reported number comes from
 running this code against the datasets below.
 
-## What this study found
+## What this study actually found
 
 Stated here as directly as it is stated in the paper: the proposed
 prediction-informed and fragmentation-aware scheduling method
@@ -62,13 +62,14 @@ Run in order from the repository root:
 | `scripts/04_ablations.py` | Model-selection-layer and placement-constraint ablations | `processed/ablation_results.json` |
 | `scripts/05_sweep.py` | 19-point cluster-size sweep, 64 to 615 hosts | `processed/sweep_results.csv/json`, `sweep_crossover_check.csv` |
 | `scripts/06_bootstrap.py` | 300-replicate job-level bootstrap at 120 and 64 hosts | `processed/bootstrap_raw.csv`, `bootstrap_summary.csv`, `bootstrap_comparisons.csv` |
-| `scripts/07_crosstrace_helios.py` | Cross-trace validation on all 4 Helios clusters | `processed/crosstrace_helios_*.csv/json` |
+| `scripts/07_crosstrace_helios.py` | Cross-trace validation on all 4 Helios clusters, bootstrapped at each cluster's constrained floor, one added intermediate matched-contention point, and full capacity | `processed/crosstrace_helios_*.csv/json` |
 | `scripts/08_make_figures.py` | Builds the figures referenced in Section 6.2 and Section 6.4 | `figures/fig1_sweep_curve.png`, `figures/fig2_bootstrap_ci.png`, `figures/fig3_crosstrace_helios.png` |
 | `scripts/09_peak_demand_check.py` | Computes the two peak-concurrent-GPU-demand figures cited in Section 5.1 (real, whole-cluster peak) and Section 5.3 (peak demand of the 656 replayed test-set jobs alone) | `processed/peak_demand_check.json` |
 | `scripts/10_oracle_bootstrap.py` | Oracle-duration upper-bound check (Section 6.2): reruns the same 300-replicate bootstrap at 120 and 64 hosts with an `Oracle_SRPT` policy ordered on true, already-known job duration instead of a prediction, to separate predictor quality from the value of prediction-informed ordering itself. Reuses the exact resample sequence from `06_bootstrap.py` so results are directly paired against `Backfill_FIFO` and `RF_SRPT_proxy` there. | `processed/oracle_bootstrap_raw.csv`, `oracle_bootstrap_summary.csv`, `oracle_bootstrap_comparisons.csv` |
 | `scripts/11_easy_backfill.py` | Additional established-scheduler check (Section 6.2): adds `EASY_Backfill`, the reservation-based conservative backfilling algorithm (Lifka 1995; Mu'alem & Feitelson 2001), to test whether the backfilling effect is specific to `Backfill_FIFO`'s aggressive implementation. Includes a built-in sanity check (a perfect-information diagnostic run) confirming the algorithm itself is correct independent of predictor quality. Reuses the same resample sequence as `06_bootstrap.py`. | `processed/easy_backfill_bootstrap_raw.csv`, `easy_backfill_bootstrap_summary.csv`, `easy_backfill_bootstrap_comparisons.csv` |
 | `scripts/12_footprint_sensitivity.py` | Resource-footprint sensitivity check (Section 7 Limitations): reruns the same 300-replicate, six-policy bootstrap at 120 and 64 hosts with the 5 ElasticBatchJob jobs (the only kind whose name implies runtime-resizable allocation) removed from the 656-job test set, to test whether the two headline comparisons are sensitive to treating realized worker allocation as a proxy for requested allocation. | `processed/footprint_sensitivity_bootstrap_raw.csv`, `footprint_sensitivity_comparisons.csv` |
 | `scripts/13_tenant_block_bootstrap.py` | Tenant-level block bootstrap (Section 7 Limitations): tests whether 06_bootstrap.py's job-level independence assumption matters by resampling the test set's 17 tenants with replacement instead of individual jobs, preserving within-tenant correlation. Only the three policies needed for the two headline comparisons (FIFO, Backfill_FIFO, RF_SRPT_proxy) are run, to keep runtime reasonable. | `processed/tenant_block_bootstrap_raw.csv`, `tenant_block_bootstrap_comparisons.csv` |
+| `scripts/14_predictor_ranking_metrics.py` | Predictor ranking-quality check (Section 6.1): computes Spearman rank correlation, Kendall's tau, and pairwise ordering accuracy from `predictor_test_predictions.parquet`, the property an SRPT-style scheduler actually needs, alongside the MAE/MAPE already reported. | `processed/predictor_ranking_metrics.json` |
 
 `processed/` in this repository already contains the exact output files used
 to write the paper, so you can inspect results without rerunning anything.
@@ -87,7 +88,7 @@ directory layout (`data/job.csv`, `data/worker.csv`, `data/topo.csv`,
 ## Requirements
 
 Python 3.11+, see `requirements.txt`. Key dependencies: `pandas`, `numpy`,
-`lightgbm`, `scikit-learn`, `matplotlib`.
+`lightgbm`, `scikit-learn`, `matplotlib`, `scipy`.
 
 ```bash
 pip install -r requirements.txt
@@ -104,6 +105,7 @@ python scripts/10_oracle_bootstrap.py
 python scripts/11_easy_backfill.py
 python scripts/12_footprint_sensitivity.py
 python scripts/13_tenant_block_bootstrap.py
+python scripts/14_predictor_ranking_metrics.py
 ```
 
 ## Known limitations (see paper Section 7 for the full list)
