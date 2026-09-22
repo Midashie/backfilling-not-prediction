@@ -1,8 +1,9 @@
-# Backfilling, Not Prediction (code release)
+# Backfilling Explains Most Scheduling Gains, While Prediction Benefits Are Trace-Dependent (code release)
 
-Code accompanying the paper *"Backfilling, Not Prediction: A Cluster-Size
-Sweep and Cross-Trace Bootstrap of Forecast-Driven GPU Scheduling in the LLM
-Era"* (Don Harl C. Malabanan, Aboitiz School of Innovation, Technology, And
+Code accompanying the paper *"Backfilling Explains Most Scheduling Gains,
+While Prediction Benefits Are Trace-Dependent: A Cluster-Size Sweep and
+Cross-Trace Bootstrap of Forecast-Driven GPU Scheduling in the LLM Era"*
+(Don Harl C. Malabanan, Aboitiz School of Innovation, Technology, And
 Entrepreneurship, Asian Institute of Management).
 
 This repository contains the full pipeline used to produce every number and
